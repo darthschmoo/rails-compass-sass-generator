@@ -1,11 +1,67 @@
-CompassSass
-===========
+Rails-Compass-Sass-Generator
+============================
 
-Some kinda description thingy goes here.
+Bootstrap the process of moving your Rails project's stylings
+from CSS to SASS.
 
-More documentation goes here.
+Sales pitch:
 
-Why not throw in a three page summary of the
-economic theories of Milton Friedman?
+What is SASS?  Syntactically Awesome Stylesheets!  You could call it
+a simple programming language for CSS, with all the power that implies.
+Visit http://sass-lang.com/ for more details.
 
-Copyright (c) 20XX Some Human, released under the MIT license
+Compass is a simple but honest-to-god CSS framework based on SASS.
+It lets you write your rules in SASS, and automagically updates your
+CSS files for you.  Visit http://compass-style.org/ for more details.
+
+Rails is awesome.  You should use it.
+
+This generator will do the following for you:
+
+  1) Set up a working compass installation for your project.
+  2) Installs a couple of tasks to make things a bit easier.
+     (see below).
+  3) If you have no existing CSS in public/stylesheets, adds
+     some default rules.
+
+
+
+To install:
+
+From your Rails root, issue the command:
+$ git clone git@github.com:darthschmoo/rails-compass-sass-generator.git vendor/generators/compass_sass
+
+or clone it into your ~/.rails/generators directory.
+
+
+
+To use:
+$ script/generate compass_sass
+Installing compass/sass-related files and tasks.
+No existing css detected.  Generating defaults.
+To import your new stylesheets add the following lines of HTML (or equivalent) to your webpage:
+<head>
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <link href="/stylesheets/print.css" media="print" rel="stylesheet" type="text/css" />
+  <!--[if IE]>
+      <link href="/stylesheets/ie.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <![endif]-->
+</head>
+
+
+
+rake compass:import             # migrates existing .css files from the
+                                # public/stylesheets directory, if the
+                                # related .sass files don't exist.
+
+rake compass:watch              # regenerates css from source sass files
+                                # as you work on them.
+
+
+
+
+
+Command line options:   None yet.
+
+
+Copyright (c) 2010 Bryce Anderson, released under the MIT license

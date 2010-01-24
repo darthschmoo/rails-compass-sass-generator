@@ -1,0 +1,3 @@
+* After running the generator, need some sort of message about what to do next.
+* `generate destroy` leaves generated .css files lying around.
+* Command line options.

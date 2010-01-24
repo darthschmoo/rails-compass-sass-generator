@@ -17,7 +17,7 @@ class CompassSassGenerator < Rails::Generator::Base
     action = File.basename($0)
     case action
     when "generate"
-      puts "Thank you for using this generator.  Good fortune be with you."
+      puts "Installing compass/sass-related files and tasks."
     when "destroy"
       puts "Please fill out a brief survey explaining why you are dissatisfied with this generator"
     end
@@ -43,15 +43,29 @@ class CompassSassGenerator < Rails::Generator::Base
       m.directory("public/stylesheets")
       m.directory("public/sass_stylesheets")
 
-
-      if compass_gem_installed?
-        # should translate CSS files into SASS
-        `compass --config config/compass.rb --css-dir public/stylesheets --sass-dir public/sass_stylesheets shoriyuken`
-      else
+      unless compass_gem_installed?
         puts "WARNING: compass may not be installed properly.  Try 'gem install compass'"
       end
 
+      if stylesheets_dir_empty?("public/stylesheets")
+        puts "No existing css detected.  Generating defaults."
+        for label in %w(ie screen print)
+          m.file("#{label}.css", "public/stylesheets/#{label}.css")
+          m.file("#{label}.sass", "public/sass_stylesheets/#{label}.sass")
+        end
 
+        puts <<-EOS
+To import your new stylesheets add the following lines of HTML (or equivalent) to your webpage:
+<head>
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <link href="/stylesheets/print.css" media="print" rel="stylesheet" type="text/css" />
+  <!--[if IE]>
+      <link href="/stylesheets/ie.css" media="screen, projection" rel="stylesheet" type="text/css" />
+  <![endif]-->
+</head>
+
+EOS
+      end
     end
   end
 
@@ -65,8 +79,8 @@ class CompassSassGenerator < Rails::Generator::Base
     `which compass`.blank? ? false : true
   end
 
-  def css2sass_installed?
-    `which css2sass`.blank? ? false : true
+  def stylesheets_dir_empty?( dir )
+    Dir[File.join(dir, "*")].blank?
   end
 end
 
