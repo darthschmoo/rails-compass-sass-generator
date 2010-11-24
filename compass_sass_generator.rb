@@ -1,72 +1,61 @@
-require "ruby-debug"
+class CompassSassGenerator < Rails::Generators::Base
+  desc "Sets your application up to use SASS stylesheets."
+  
+  class_option :http_path, :type => :string, :desc => "???", :default => "/"
+  class_option :images_dir, :type => :string, :desc => "Directory where images are kept", :default => "images"
+  class_option :output_style, :type => :string, :desc => "CSS output mode (nested, expanded, compact, or compressed)", :default => "nested"
+  class_option :project_type, :type => :string, :desc => "Type of project being integrated with.", :default => "stand_alone"
+  class_option :sass_dir, :type => :string, :desc => "Directory for .sass sheets.", :default => "public/sass_stylesheets"
+  class_option :style_dir, :type => :string, :desc => "Directory for .css sheets.", :default => "public/stylesheets"
 
-class CompassSassGenerator < Rails::Generator::Base
-  # you can make variables available to the templates like so:
-  #
-  # attr_reader :var
-  #
-  # then set @var in initialize or manifest.  Or just pass in @var
-  # as part of the :assigns hash when running m.template
-
-  def initialize runtime_args, runtime_options = {}
-    super
-    # do stuff here
+  source_root File.expand_path("../templates", __FILE__)
+  
+  def create_compass_tasks
+    assign_opts
+    template("compass.rake", "lib/tasks/compass.rake")
   end
+  
+  def create_compass_config
+    assign_opts  
+    template("compass.rb", "config/compass.rb")
+    template("compass.yml", "config/compass.yml")
+  end
+  
+  def create_compass_files
+    assign_opts
+    directory("stylesheets", "public/stylesheets")
+    directory("sass_stylesheets", "public/sass_stylesheets")
 
-  def manifest
-    action = File.basename($0)
-    case action
-    when "generate"
-      puts "Installing compass/sass-related files and tasks."
-    when "destroy"
-      puts "Please fill out a brief survey explaining why you are dissatisfied with this generator"
+    unless compass_gem_installed?
+      puts "WARNING: compass may not be installed properly.  compass binary not found.  Try 'gem install compass'"
     end
 
-    record do |m|
-      # Sample actions:
-      #
-      # create a directory
-      # m.directory("app/views/#{singular_name}/")
-      #
-      # copy a file from templates folder
-      # m.file("stuff.css", "public/stylesheets/#{singular_name}/stuff.css")
-      #
-      # evaluate
-      # m.template( "scaffold_show.rb", "app/views/target/show.html.erb,
-      #             :assigns => { :named => @named, :model_name => @model_name } )
-      #
-      # create a migration
-      # m.migration("totally_screw_up_database.rb", migration_directory)
+  end
+  
+  def add_compass_gem_to_gemfile
+    say "Adding compass to your Gemfile"
+    append_file "Gemfile", "\n\n# added by compass_sass generator\ngem \"compass\"\n" 
+  end
+  
+  def explain_what_just_happened
+    assign_opts
+    say <<-EOS
 
-      m.file("compass.rake", "lib/tasks/compass.rake")
-      m.file("compass.rb", "config/compass.rb")
-      m.directory("public/stylesheets")
-      m.directory("public/sass_stylesheets")
+New tasks:
+    rake compass:watch           # updates css files whenever your sass files change
+    rake compass:import          # takes css files you've already written and translates them into sass
 
-      unless compass_gem_installed?
-        puts "WARNING: compass may not be installed properly.  Try 'gem install compass'"
-      end
-
-      if stylesheets_dir_empty?("public/stylesheets")
-        puts "No existing css detected.  Generating defaults."
-        for label in %w(ie screen print)
-          m.file("#{label}.css", "public/stylesheets/#{label}.css")
-          m.file("#{label}.sass", "public/sass_stylesheets/#{label}.sass")
-        end
-
-        puts <<-EOS
-To import your new stylesheets add the following lines of HTML (or equivalent) to your webpage:
-<head>
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" />
-  <link href="/stylesheets/print.css" media="print" rel="stylesheet" type="text/css" />
-  <!--[if IE]>
-      <link href="/stylesheets/ie.css" media="screen, projection" rel="stylesheet" type="text/css" />
-  <![endif]-->
-</head>
-
+To import your new stylesheets add the following lines to your layout's head':
+  <head>
+    <%= stylesheet_link_tag 'screen', :media => 'screen' %>
+    <%= stylesheet_link_tag 'print', :media => 'print' %>
+    
+    <!--[if lt IE 7]>
+      <%= stylesheet_link_tag 'ie' %>
+    <![endif]-->
+  </head>
+  
 EOS
-      end
-    end
   end
 
   protected
@@ -78,9 +67,12 @@ EOS
   def compass_gem_installed?
     `which compass`.blank? ? false : true
   end
-
-  def stylesheets_dir_empty?( dir )
-    Dir[File.join(dir, "*")].blank?
+  
+  def assign_opts
+    for key, value in options
+      instance_variable_set "@#{key}", value
+    end
+    nil
   end
 end
 

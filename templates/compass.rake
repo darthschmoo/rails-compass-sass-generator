@@ -1,11 +1,13 @@
 namespace :compass do
   desc "Regenerate css files as their sass source files change."
   task :watch do
-    config = "config/compass.rb"
-    css_dir = "public/stylesheets"
-    sass_dir = "public/sass_stylesheets"
+    config_file = File.join( Rails.root.to_s, "config", "compass.yml" )
+    configuration = YAML.load( File.read( config_file ) )
 
-    system("compass -w --sass-dir #{sass_dir} --css-dir #{css_dir} --config #{config}")
+    config = "config/compass.rb"
+    command = "compass watch --sass-dir #{configuration['sass_dir']} --css-dir #{configuration['css_dir']} --config #{config}"
+    puts command
+    system( command )
   end
 
   desc "If no sass file exists for a css file, create it using css2sass."
@@ -19,11 +21,12 @@ namespace :compass do
       return false
     end
 
-    config = "config/compass.rb"
-    css_dir = "public/stylesheets"
-    sass_dir = "public/sass_stylesheets"
+    config_file = File.join( Rails.root.to_s, "config", "compass.yml" )
+    configuration = YAML.load( File.read( config_file ) )
+    css_dir = configuration[:css_dir]
+    sass_dir = configuration[:sass_dir]
 
-    files = `find #{css_dir} -name "*.css"`.split.map{ |f|
+    files = Dir["#{css_dir}/*.css"].map{ |f|
       [f, f.gsub(/^#{css_dir}/, sass_dir).gsub(/\.css$/, ".sass")]
     }
 

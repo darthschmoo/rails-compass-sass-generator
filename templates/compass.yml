@@ -1,0 +1,7 @@
+---
+project_type:  :<%= @project_type || "stand_alone" %>
+http_path:     "<%= @http_path || "/" %>"
+css_dir:       "<%= @css_dir || "stylesheets" %>"
+sass_dir:      "<%= @sass_dir || "sass_stylesheets" %>"
+images_dir:    "<%= @images_dir || "images" %>"
+output_style:  :<%= @output_style || "nested" %>
